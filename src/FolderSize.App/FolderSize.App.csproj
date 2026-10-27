@@ -12,6 +12,7 @@
     <Description>Ứng dụng Windows xem và quản lý dung lượng thư mục. Phát triển bởi LTA.</Description>
   </PropertyGroup>
   <ItemGroup><Resource Include="Assets/FolderSize.ico"/><Resource Include="Assets/FolderSize.png"/></ItemGroup>
+  <ItemGroup><EmbeddedResource Include="Localization/Strings.json"/></ItemGroup>
   <ItemGroup><Content Include="../../LICENSE" Link="LICENSE" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" ExcludeFromSingleFile="true"/></ItemGroup>
   <ItemGroup><ProjectReference Include="../FolderSize.Core/FolderSize.Core.csproj"/></ItemGroup>
 </Project>
