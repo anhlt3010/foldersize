@@ -5,6 +5,7 @@ using FolderSize.Core.Actions;
 using FolderSize.App.Services;
 using FolderSize.App.Infrastructure;
 using FolderSize.Core.Presentation;
+using System.Windows.Input;
 namespace FolderSize.App.ViewModels;
 public enum AppState { Empty, Scanning, Completed, Canceled, Recycling, Failed, Stale }
 public sealed class MainViewModel(DirectoryScanner scanner, IShellService shell, IUserDialogs dialogs) : ObservableObject
@@ -18,13 +19,26 @@ public sealed class MainViewModel(DirectoryScanner scanner, IShellService shell,
     private long generation;
     private readonly HashSet<string> expanded = new(StringComparer.OrdinalIgnoreCase);
     public string PathInput { get => pathInput; set => Set(ref pathInput, value); }
-    public ObservableCollection<NodeRowViewModel> Rows { get; } = [];
-    public NodeRowViewModel? SelectedRow { get => selectedRow; set { Set(ref selectedRow, value); Notify(nameof(CanRecycle)); } }
-    public AppState State { get => state; private set { Set(ref state, value); Notify(nameof(CanScan)); Notify(nameof(CanCancel)); Notify(nameof(CanRecycle)); } }
+    public BatchCollection<NodeRowViewModel> Rows { get; } = [];
+    public NodeRowViewModel? SelectedRow { get => selectedRow; set { Set(ref selectedRow, value); Notify(nameof(CanRecycle)); Notify(nameof(RecycleReason)); CommandManager.InvalidateRequerySuggested(); } }
+    public AppState State { get => state; private set { Set(ref state, value); foreach (var name in new[] { nameof(CanScan), nameof(CanCancel), nameof(CanRecycle), nameof(StateLabel), nameof(RecycleReason), nameof(IsEmpty) }) Notify(name); CommandManager.InvalidateRequerySuggested(); } }
     public string StatusText { get; private set; } = "";
     public IReadOnlyList<ScanIssue> Issues { get; private set; } = [];
     public bool CanScan => State is not (AppState.Scanning or AppState.Recycling);
     public bool CanCancel => State == AppState.Scanning;
+    public bool IsEmpty => Rows.Count == 0;
+    public string TotalSize => root is null ? "—" : SizeFormatter.Format(root.SizeBytes);
+    public string TotalFiles => root?.FileCount.ToString("N0") ?? "—";
+    public string TotalDirectories => root?.DirectoryCount.ToString("N0") ?? "—";
+    public string IssueLabel => $"{Issues.Count:N0} mục bị bỏ qua / lỗi · Xem chi tiết";
+    public string StateLabel => State switch { AppState.Empty => "Chọn vị trí để bắt đầu", AppState.Scanning => "Đang quét…", AppState.Completed => root?.IsIncomplete == true ? "Hoàn tất · kết quả chưa đầy đủ" : "Quét hoàn tất", AppState.Canceled => "Đã hủy · kết quả tạm", AppState.Recycling => "Đang chuyển vào Thùng rác…", AppState.Stale => "Cần quét lại", _ => "Không thể quét" };
+    public string RecycleReason => CanRecycle ? "Thư mục bao gồm toàn bộ nội dung con. Dữ liệu có thể đã thay đổi từ lần quét." : SelectedRow is null ? "Chọn một mục trong bảng để xem chi tiết." : string.Equals(SelectedRow.Node.FullPath, scanRoot, StringComparison.OrdinalIgnoreCase) ? "Không thể xóa gốc vùng quét. Hãy quét thư mục cha nếu cần quản lý mục này." : "Chỉ chuyển vào Thùng rác sau khi quét hoàn tất; liên kết bị bỏ qua không được xóa.";
+    private RelayCommand? scanCommand, cancelCommand, recycleCommand, openCommand, toggleCommand;
+    public ICommand ScanCommand => scanCommand ??= new(_ => ScanAsync(), _ => CanScan);
+    public ICommand CancelCommand => cancelCommand ??= new(_ => { Cancel(); return Task.CompletedTask; }, _ => CanCancel);
+    public ICommand RecycleCommand => recycleCommand ??= new(_ => RecycleSelectedAsync(), _ => CanRecycle);
+    public ICommand OpenCommand => openCommand ??= new(_ => OpenSelectedAsync(), _ => SelectedRow is not null && CanScan);
+    public ICommand ToggleCommand => toggleCommand ??= new(p => { if (p is NodeRowViewModel row) ToggleExpanded(row); return Task.CompletedTask; });
     public bool CanRecycle => State == AppState.Completed && SelectedRow is { Node.IsSkipped: false } row &&
         scanRoot is not null && !string.Equals(scanRoot, row.Node.FullPath, StringComparison.OrdinalIgnoreCase) &&
         row.Node.FullPath.StartsWith(Path.TrimEndingDirectorySeparator(scanRoot) + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase);
@@ -50,7 +64,7 @@ public sealed class MainViewModel(DirectoryScanner scanner, IShellService shell,
             ++generation;
             root = result.Root; Issues = result.Issues; RefreshRows(!result.IsCanceled);
             State = result.IsCanceled ? AppState.Canceled : AppState.Completed;
-            StatusText = result.IsCanceled ? "Đã hủy — kết quả tạm, chưa đầy đủ." : "Quét hoàn tất.";
+            StatusText = result.IsCanceled ? "Đã hủy — kết quả tạm, chưa đầy đủ." : root.IsIncomplete ? "Quét hoàn tất. Một số mục chưa đọc được; xem chi tiết lỗi." : "Quét hoàn tất. Dung lượng là kích thước logic tại thời điểm quét.";
         }
         catch (Exception e)
         { State = AppState.Failed; StatusText = e.Message; dialogs.ShowError("Không thể quét", e.Message); }
@@ -73,14 +87,12 @@ public sealed class MainViewModel(DirectoryScanner scanner, IShellService shell,
             if (existing.TryGetValue(row.Node.FullPath, out var vm)) { vm.Update(row); return vm; }
             return new NodeRowViewModel(row);
         }).ToArray();
-        for (var i = 0; i < target.Length; i++)
-        {
-            if (i < Rows.Count && ReferenceEquals(Rows[i], target[i])) continue;
-            var previous = Rows.IndexOf(target[i]);
-            if (previous >= 0) Rows.Move(previous, i); else Rows.Insert(i, target[i]);
-        }
-        while (Rows.Count > target.Length) Rows.RemoveAt(Rows.Count - 1);
-        if (SelectedRow is not null && !Rows.Contains(SelectedRow)) SelectedRow = null;
+        var selection = SelectedRow;
+        // A reset batches large branch changes. Reuse row instances and restore selection
+        // after WPF processes the collection notification synchronously.
+        if (Rows.Count != target.Length || !Rows.SequenceEqual(target)) Rows.Replace(target);
+        SelectedRow = selection is not null && target.Contains(selection) ? selection : null;
+        foreach (var name in new[] { nameof(TotalSize), nameof(TotalFiles), nameof(TotalDirectories), nameof(IsEmpty), nameof(IssueLabel), nameof(SelectedRow) }) Notify(name);
     }
     public async Task RecycleSelectedAsync()
     {

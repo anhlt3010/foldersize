@@ -8,6 +8,19 @@ namespace FolderSize.Tests;
 public class MainViewModelTests
 {
     [Fact]
+    public async Task OpeningLargeBranchBatchesCollectionChanges()
+    {
+        var fs = new FakeFileSystem(); var sub = Path.Combine(Root, "sub");
+        var children = Enumerable.Range(0, 1000).Select(i => Path.Combine(sub, $"file{i}")).ToArray();
+        fs.Directory(Root, sub); fs.Directory(sub, children); foreach (var child in children) fs.File(child, 1);
+        var vm = new MainViewModel(new(fs), new FakeShell(), new FakeDialogs()) { PathInput = Root };
+        await vm.ScanAsync(); vm.SelectedRow = vm.Rows[1]; var selected = vm.SelectedRow;
+        var changes = 0; vm.Rows.CollectionChanged += (_, _) => changes++;
+        vm.ToggleExpanded(vm.Rows[1]);
+        Assert.Equal(1002, vm.Rows.Count); Assert.Same(selected, vm.SelectedRow);
+        Assert.InRange(changes, 1, 2);
+    }
+    [Fact]
     public async Task CanceledConfirmationDoesNotCallShell()
     {
         var shell = new FakeShell(); var vm = new MainViewModel(new(Fixture()), shell, new FakeDialogs { Confirm = false }) { PathInput = Root };
