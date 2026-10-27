@@ -42,3 +42,9 @@ Kiểm thử Shell chỉ dùng fixture do runner tự tạo; không xóa dữ li
 ```
 
 Xem [bằng chứng và giới hạn kiểm tra](docs/verification.md).
+
+## Nhận diện và credit
+
+FolderSize được phát triển bởi **LTA**. **© 2026 LTA. Bảo lưu mọi quyền.** Xem nút **Giới thiệu** trong ứng dụng để xem phiên bản và credit.
+
+Icon app được vẽ riêng, có các kích thước 16–256 px. Có thể tái tạo từ vector bằng `./scripts/Generate-AppIcon.ps1`. Cây dùng icon Windows Shell cho thư mục đóng/mở, ổ đĩa và loại file theo liên kết của Windows; không đóng gói lại bộ icon hệ thống. Icon loại file được lấy theo phần mở rộng, không đọc file đích hoặc tải nội dung đám mây.

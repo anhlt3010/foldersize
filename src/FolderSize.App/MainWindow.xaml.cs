@@ -14,6 +14,7 @@ public partial class MainWindow : Window
         DataContext = new MainViewModel(new DirectoryScanner(new PhysicalFileSystem()), new WindowsShellService(), new UserDialogs());
     }
     private void Pick_Click(object sender, RoutedEventArgs e) { var path = FolderPicker.Pick(); if (path is not null) ViewModel.PathInput = path; }
+    private void About_Click(object sender, RoutedEventArgs e) => new AboutWindow { Owner = this }.ShowDialog();
     private void Tree_KeyDown(object sender, KeyEventArgs e)
     {
         if (ViewModel.SelectedRow is not { } row) return;

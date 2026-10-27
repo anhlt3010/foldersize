@@ -1,0 +1,19 @@
+<DrawingImage xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation">
+  <DrawingImage.Drawing>
+    <DrawingGroup>
+      <GeometryDrawing Brush="Transparent" Geometry="M0,0 H256 V256 H0 Z"/>
+      <GeometryDrawing>
+        <GeometryDrawing.Brush><LinearGradientBrush StartPoint="0,0" EndPoint="1,1"><GradientStop Color="#3B82F6" Offset="0"/><GradientStop Color="#1E40AF" Offset="1"/></LinearGradientBrush></GeometryDrawing.Brush>
+        <GeometryDrawing.Geometry><RectangleGeometry Rect="8,8,240,240" RadiusX="52" RadiusY="52"/></GeometryDrawing.Geometry>
+      </GeometryDrawing>
+      <GeometryDrawing Brush="#E69E24" Geometry="M40,80 Q40,64 56,64 H98 Q107,64 114,74 L124,86 H200 Q216,86 216,102 V184 Q216,200 200,200 H56 Q40,200 40,184 Z"/>
+      <GeometryDrawing>
+        <GeometryDrawing.Brush><LinearGradientBrush StartPoint="0,0" EndPoint="0,1"><GradientStop Color="#FFE69A" Offset="0"/><GradientStop Color="#FBBF24" Offset="1"/></LinearGradientBrush></GeometryDrawing.Brush>
+        <GeometryDrawing.Geometry><PathGeometry Figures="M36,106 Q34,96 46,96 H218 Q230,96 226,108 L209,188 Q207,200 194,200 H58 Q46,200 44,188 Z"/></GeometryDrawing.Geometry>
+      </GeometryDrawing>
+      <GeometryDrawing Brush="#1E40AF"><GeometryDrawing.Geometry><RectangleGeometry Rect="83,150,24,34" RadiusX="5" RadiusY="5"/></GeometryDrawing.Geometry></GeometryDrawing>
+      <GeometryDrawing Brush="#2563EB"><GeometryDrawing.Geometry><RectangleGeometry Rect="120,130,24,54" RadiusX="5" RadiusY="5"/></GeometryDrawing.Geometry></GeometryDrawing>
+      <GeometryDrawing Brush="#1D4ED8"><GeometryDrawing.Geometry><RectangleGeometry Rect="157,110,24,74" RadiusX="5" RadiusY="5"/></GeometryDrawing.Geometry></GeometryDrawing>
+    </DrawingGroup>
+  </DrawingImage.Drawing>
+</DrawingImage>

@@ -25,3 +25,13 @@ Môi trường: Windows x64, 2026-10-27, SDK cục bộ .NET 10.0.403. SDK tải
 ## Rà soát cuối
 - Review độc lập toàn nhánh: không có Critical; 1 Important — CanRecycle tạo separator kép khi gốc quét là ổ đĩa. Test `DriveRootCannotBeRecycledButItsDescendantCan` đã FAIL đúng điều kiện, sau sửa PASS. Toàn bộ **45/45 test Release PASS**, build Release **0 warnings / 0 errors**, `git diff --check` PASS. Không có minor hoãn lại, không có mục reviewer từ chối đánh giá.
 - Exe portable đã khởi chạy và được quan sát trạng thái trống bằng accessibility. ZIP gồm 402 entries, có exe, coreclr.dll, PresentationFramework.dll và app DLL. Chưa thực hiện toàn bộ chuỗi thao tác UI trên exe publish như đã nêu ở trên.
+
+## Nhận diện / credit LTA — 2026-10-27
+- App v1.1.0: icon riêng từ vector trong repo, ICO 9 kích thước 16/20/24/32/40/48/64/128/256 px. Header/Giới thiệu dùng PNG256 để tránh WPF chọn frame ICO nhỏ rồi phóng lớn.
+- Company/Authors = LTA, copyright © 2026 LTA; đã đọc metadata Win32 của exe và kiểm tra cửa sổ Giới thiệu.
+- WindowsIconTests: đã thấy 2 test FAIL trước implementation; sau implementation, toàn suite 47/47 Release PASS. Test dùng Windows thật, kiểm tra icon đóng/mở/ổ đĩa, frozen BitmapSource, cache tái sử dụng và loại file khi đường dẫn không tồn tại.
+- UI smoke: ICO decode đủ9frames; Window.Icon có resource; mọi ListViewItem hiện thực đều có Image.Source Windows. 100.000 file vẫn chỉ14containers, giữ lựa chọn và thu gọn đúng2dòng. Đã xem ảnh mở cây và Giới thiệu ở DPI150%.
+- Icon Windows: SHGetStockIconInfo/SHGetFileInfoW với SHGFI_USEFILEATTRIBUTES; chỉ đưa tên giả + phần mở rộng, không đưa đường dẫn file thực; giải phóng HICON bằng DestroyIcon, bitmap frozen, cache tối đa128mục. Icon gắn tại template dòng nhìn thấy, không gắn cho toàn bộ100k node.
+- Nguồn API Microsoft: https://learn.microsoft.com/en-us/windows/win32/api/shellapi/nf-shellapi-shgetstockiconinfo ; https://learn.microsoft.com/en-us/windows/win32/api/shellapi/nf-shellapi-shgetfileinfow
+- Trong lần đóng gói đầu của thay đổi icon, test trạng thái cũ lỗi không ổn định (ShellCancelOrFailureIsNotSuccess). Đã điều tra và tái hiện bằng `HeadlessProgressCannotClearSelectionAfterCompletion`: callback Progress<T> chạy thread pool khi không có SynchronizationContext có thể vượt generation guard rồi xóa lựa chọn sau completion. Test mới FAIL (selected row thành null), sau sửa chỉ phát progress khi có context đồng bộ, suite48/48 Release và UI100k PASS. WPF vẫn có context giao diện và nhận progress; runner headless nhận kết quả cuối.
+- Review độc lập phần icon/native/resource/credit: không có Critical/Important, không có mục từ chối đánh giá. Cache128, frozen BitmapSource, HICON lifetime và template chỉ dòng hiện thực đã được rà soát.

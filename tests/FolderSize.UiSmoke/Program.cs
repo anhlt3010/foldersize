@@ -26,6 +26,15 @@ internal static class Program
                 var output = Path.GetFullPath(args.FirstOrDefault() ?? "artifacts/ui"); Directory.CreateDirectory(output);
                 window = new MainWindow { Left = -20000, Top = -20000, ShowActivated = false };
                 window.Show(); await Layout(window); Save(window, Path.Combine(output, "empty.png"));
+                if (window.Icon is null) throw new Exception("Application icon missing");
+                using (var iconStream = File.OpenRead("src/FolderSize.App/Assets/FolderSize.ico"))
+                {
+                    var decoder = new IconBitmapDecoder(iconStream, BitmapCreateOptions.PreservePixelFormat, BitmapCacheOption.OnLoad);
+                    if (decoder.Frames.Count != 9 || !decoder.Frames.Any(frame => frame.PixelWidth == 16) || !decoder.Frames.Any(frame => frame.PixelWidth == 256))
+                        throw new Exception("Multi-resolution application icon invalid");
+                }
+                var about = new AboutWindow { Owner = window, WindowStartupLocation = WindowStartupLocation.Manual, Left = -20000, Top = -20000, ShowActivated = false };
+                about.Show(); await Layout(about); Save(about, Path.Combine(output, "about.png")); about.Close();
                 var vm = new MainViewModel(new(new SyntheticFileSystem()), new NoShell(), new NoDialogs()) { PathInput = @"C:\FolderSizeFixture" };
                 window.DataContext = vm;
                 await vm.ScanAsync(); await Layout(window);
@@ -35,6 +44,7 @@ internal static class Program
                 var count = Descendants<ListViewItem>(list).Count();
                 Console.WriteLine($"100,000 files: {vm.Rows.Count} visible rows, {count} realized containers; DPI={VisualTreeHelper.GetDpi(window).PixelsPerDip}");
                 if (vm.Rows.Count != 100002 || count < 1 || count > 150) throw new Exception("Virtualization failed");
+                if (Descendants<Image>(list).Count(image => image.Source is not null) != count) throw new Exception("Windows tree icons missing");
                 if (vm.SelectedRow?.Node.Name != "Thư mục lớn") throw new Exception("Selection lost");
                 Save(window, Path.Combine(output, "expanded.png"));
                 vm.ToggleExpanded(vm.Rows[1]); await Layout(window);

@@ -1,0 +1,15 @@
+<Window x:Class="FolderSize.App.AboutWindow" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Title="Giới thiệu FolderSize" Icon="Assets/FolderSize.ico" Width="480" SizeToContent="Height" ResizeMode="NoResize" WindowStartupLocation="CenterOwner" ShowInTaskbar="False">
+  <Border Background="#F8FAFC" Padding="32">
+    <StackPanel>
+      <Image Source="Assets/FolderSize.png" Width="80" Height="80" HorizontalAlignment="Left" Margin="0,0,0,20" RenderOptions.BitmapScalingMode="HighQuality"/>
+      <TextBlock Text="FolderSize" FontSize="28" FontWeight="SemiBold"/>
+      <TextBlock x:Name="VersionLabel" Foreground="#64748B" Margin="0,5,0,20"/>
+      <TextBlock Text="Tìm và quản lý dung lượng theo cây thư mục trên Windows." TextWrapping="Wrap" Margin="0,0,0,20"/>
+      <TextBlock Text="Phát triển bởi LTA" FontWeight="SemiBold" Margin="0,0,0,6"/>
+      <TextBlock Text="© 2026 LTA. Bảo lưu mọi quyền." TextWrapping="Wrap"/>
+      <Separator Margin="0,22,0,16"/>
+      <TextBlock Text="Icon thư mục, ổ đĩa và loại file trong cây được cung cấp bởi Windows Shell. Các biểu tượng hệ thống thuộc Microsoft hoặc chủ sở hữu tương ứng." FontSize="12" Foreground="#64748B" TextWrapping="Wrap" Margin="0,0,0,24"/>
+      <Button Content="Đóng" IsCancel="True" IsDefault="True" HorizontalAlignment="Right" MinWidth="90" Click="Close_Click"/>
+    </StackPanel>
+  </Border>
+</Window>

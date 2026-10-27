@@ -12,9 +12,8 @@ public sealed class NodeRowViewModel(NodeRow row) : ObservableObject
     public string Share => Row.ParentShare is double value ? value.ToString("0.#", System.Globalization.CultureInfo.GetCultureInfo("vi-VN")) + "%" : "—";
     public double ShareValue => Row.ParentShare ?? 0;
     public string Toggle => !Row.HasChildren ? "" : Row.IsExpanded ? "⌄" : "›";
-    public string Icon => Node.IsDirectory ? "▣" : "▫";
     public System.Windows.Thickness Indent => new(Row.Depth * 20, 0, 0, 0);
     public string Note => Node.IsSkipped ? "Bỏ qua liên kết" : Node.IsIncomplete ? "Chưa đầy đủ" : "";
     public void Update(NodeRow value)
-    { row = value; foreach (var name in new[] { nameof(Node), nameof(Row), nameof(Name), nameof(Size), nameof(Count), nameof(Share), nameof(ShareValue), nameof(Toggle), nameof(Icon), nameof(Indent), nameof(Note) }) Notify(name); }
+    { row = value; foreach (var name in new[] { nameof(Node), nameof(Row), nameof(Name), nameof(Size), nameof(Count), nameof(Share), nameof(ShareValue), nameof(Toggle), nameof(Indent), nameof(Note) }) Notify(name); }
 }
