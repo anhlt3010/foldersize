@@ -8,6 +8,47 @@ namespace FolderSize.Tests;
 public class MainViewModelTests
 {
     [Fact]
+    public async Task HeadlessProgressCannotClearSelectionAfterCompletion()
+    {
+        using var progressEntered = new ManualResetEventSlim();
+        using var releaseProgress = new ManualResetEventSlim();
+        using var progressFinished = new ManualResetEventSlim();
+        var fs = new FakeFileSystem();
+        var first = Path.Combine(Root, "first"); var second = Path.Combine(Root, "second");
+        fs.Directory(Root, first, second); fs.File(first, 42); fs.File(second, 84);
+        var awaitingProgress = 0;
+        fs.OnRead = path =>
+        {
+            if (path == first) Thread.Sleep(550); // Force an intermediate progress report.
+            if (path == second)
+            {
+                Volatile.Write(ref awaitingProgress, 1);
+                progressEntered.Wait(TimeSpan.FromSeconds(1));
+                Volatile.Write(ref awaitingProgress, 0);
+            }
+        };
+        var vm = new MainViewModel(new(fs), new FakeShell(), new FakeDialogs()) { PathInput = Root };
+        vm.Rows.CollectionChanged += (_, _) =>
+        {
+            if (Volatile.Read(ref awaitingProgress) != 1) return;
+            progressEntered.Set(); releaseProgress.Wait(TimeSpan.FromSeconds(5));
+        };
+        vm.PropertyChanged += (_, e) => { if (e.PropertyName == "StatusText" && releaseProgress.IsSet) progressFinished.Set(); };
+        var previous = SynchronizationContext.Current; Task scan;
+        try { SynchronizationContext.SetSynchronizationContext(null); scan = vm.ScanAsync(); }
+        finally { SynchronizationContext.SetSynchronizationContext(previous); }
+        try
+        {
+            await scan; Assert.Equal(AppState.Completed, vm.State);
+            vm.SelectedRow = vm.Rows[1]; var selection = vm.SelectedRow;
+            releaseProgress.Set();
+            if (progressEntered.IsSet) Assert.True(progressFinished.Wait(TimeSpan.FromSeconds(3)));
+            Assert.Same(selection, vm.SelectedRow);
+            Assert.True(vm.CanRecycle);
+        }
+        finally { releaseProgress.Set(); }
+    }
+    [Fact]
     public async Task DriveRootCannotBeRecycledButItsDescendantCan()
     {
         var fs = new FakeFileSystem(); fs.Directory(@"C:\", @"C:\file.bin"); fs.File(@"C:\file.bin", 42);

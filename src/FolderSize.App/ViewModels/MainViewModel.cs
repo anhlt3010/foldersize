@@ -55,7 +55,10 @@ public sealed class MainViewModel(DirectoryScanner scanner, IShellService shell,
             var newRoot = Path.GetFullPath(PathInput);
             if (!string.Equals(scanRoot, newRoot, StringComparison.OrdinalIgnoreCase)) { expanded.Clear(); SelectedRow = null; }
             scanRoot = newRoot; expanded.Add(scanRoot);
-            var progress = new Progress<ScanProgress>(report =>
+            // A WPF/UI synchronization context serializes progress and completion.
+            // Without one, Progress<T> posts concurrent thread-pool callbacks which
+            // can outlive the generation check and clear a newly selected row.
+            IProgress<ScanProgress>? progress = SynchronizationContext.Current is null ? null : new Progress<ScanProgress>(report =>
             {
                 if (generation != scanGeneration || State != AppState.Scanning) return;
                 root = report.Snapshot; RefreshRows(false);
