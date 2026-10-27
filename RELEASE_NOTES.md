@@ -13,6 +13,7 @@ Tài liệu ghi lại thay đổi trong các phiên bản mã nguồn. Các mụ
 - File và thư mục rỗng không còn hiển thị ô nút trống; giữ khoảng trống để căn các mục trong cây.
 - Thêm tooltip và tên accessibility theo trạng thái: “Mở thư mục” hoặc “Thu gọn thư mục”.
 - Giữ thao tác đóng/mở bằng phím Trái/Phải và các icon Windows đã có.
+- Bổ sung MIT License với copyright thuộc LTA; tệp `LICENSE` được đưa vào gói publish.
 
 ### Kiểm tra
 
@@ -65,4 +66,4 @@ Tài liệu ghi lại thay đổi trong các phiên bản mã nguồn. Các mụ
 
 ---
 
-**FolderSize được phát triển bởi LTA. © 2026 LTA. Bảo lưu mọi quyền.**
+**FolderSize được phát triển bởi LTA. © 2026 LTA.** Phát hành theo [MIT License](LICENSE).

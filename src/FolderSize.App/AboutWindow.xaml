@@ -6,7 +6,7 @@
       <TextBlock x:Name="VersionLabel" Foreground="#64748B" Margin="0,5,0,20"/>
       <TextBlock Text="Tìm và quản lý dung lượng theo cây thư mục trên Windows." TextWrapping="Wrap" Margin="0,0,0,20"/>
       <TextBlock Text="Phát triển bởi LTA" FontWeight="SemiBold" Margin="0,0,0,6"/>
-      <TextBlock Text="© 2026 LTA. Bảo lưu mọi quyền." TextWrapping="Wrap"/>
+      <TextBlock Text="© 2026 LTA · MIT License" TextWrapping="Wrap"/>
       <Separator Margin="0,22,0,16"/>
       <TextBlock Text="Icon thư mục, ổ đĩa và loại file trong cây được cung cấp bởi Windows Shell. Các biểu tượng hệ thống thuộc Microsoft hoặc chủ sở hữu tương ứng." FontSize="12" Foreground="#64748B" TextWrapping="Wrap" Margin="0,0,0,24"/>
       <Button Content="Đóng" IsCancel="True" IsDefault="True" HorizontalAlignment="Right" MinWidth="90" Click="Close_Click"/>

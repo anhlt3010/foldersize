@@ -32,6 +32,8 @@ FolderSize quét thư mục hoặc ổ đĩa, hiển thị dung lượng theo c�
 
 Bản portable chứa sẵn runtime .NET, không cần cài .NET riêng. Ứng dụng không tự yêu cầu quyền quản trị.
 
+Gói Release đóng gói một EXE gồm `FolderSize.App.exe` và tệp `LICENSE`, không có PDB hay DLL rời. Giữ tệp `LICENSE` khi phân phối lại phần mềm.
+
 Gói ZIP là kết quả build, không được lưu trong Git. Nếu bạn tải mã nguồn bằng **Code → Download ZIP**, hãy build theo hướng dẫn bên dưới trước khi chạy.
 
 ### Sử dụng
@@ -115,7 +117,7 @@ Shell smoke chỉ thao tác với fixture do runner tạo và không dọn Thùn
 
 ## Credit và bản quyền
 
-**Phát triển bởi LTA. © 2026 LTA. Bảo lưu mọi quyền.**
+**Phát triển bởi LTA. © 2026 LTA.** Phần mềm được phát hành theo [MIT License](LICENSE).
 
 Trong ứng dụng, bấm **Giới thiệu** để xem phiên bản và credit. Thông tin LTA cũng được ghi trong metadata của exe.
 
