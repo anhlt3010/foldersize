@@ -6,6 +6,57 @@
     <Setter Property="Template"><Setter.Value><ControlTemplate TargetType="Button"><Border x:Name="Border" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="1" CornerRadius="5" Padding="{TemplateBinding Padding}"><ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/></Border><ControlTemplate.Triggers><Trigger Property="IsMouseOver" Value="True"><Setter TargetName="Border" Property="Opacity" Value="0.8"/></Trigger><Trigger Property="IsKeyboardFocused" Value="True"><Setter TargetName="Border" Property="BorderBrush" Value="#2563EB"/><Setter TargetName="Border" Property="BorderThickness" Value="2"/></Trigger><Trigger Property="IsEnabled" Value="False"><Setter TargetName="Border" Property="Opacity" Value="0.4"/></Trigger></ControlTemplate.Triggers></ControlTemplate></Setter.Value></Setter>
   </Style>
   <Style x:Key="PrimaryButton" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}"><Setter Property="Background" Value="#2563EB"/><Setter Property="Foreground" Value="White"/><Setter Property="BorderBrush" Value="#2563EB"/></Style>
+  <Style x:Key="TreeExpander" TargetType="Button">
+    <Setter Property="Width" Value="24"/>
+    <Setter Property="Height" Value="24"/>
+    <Setter Property="Margin" Value="0,0,3,0"/>
+    <Setter Property="Padding" Value="0"/>
+    <Setter Property="Background" Value="Transparent"/>
+    <Setter Property="Foreground" Value="#718096"/>
+    <Setter Property="BorderThickness" Value="0"/>
+    <Setter Property="Cursor" Value="Hand"/>
+    <Setter Property="Focusable" Value="False"/>
+    <Setter Property="IsTabStop" Value="False"/>
+    <Setter Property="VerticalAlignment" Value="Center"/>
+    <Setter Property="ToolTip" Value="Mở thư mục"/>
+    <Setter Property="AutomationProperties.Name" Value="Mở thư mục"/>
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="Button">
+          <Border x:Name="HitArea" Background="{TemplateBinding Background}" CornerRadius="5" SnapsToDevicePixels="True">
+            <Grid Width="12" Height="12" HorizontalAlignment="Center" VerticalAlignment="Center">
+              <Path x:Name="Chevron" Data="M 4,2.5 L 7.5,6 L 4,9.5" Stroke="{TemplateBinding Foreground}" StrokeThickness="1.5" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" RenderTransformOrigin="0.5,0.5">
+                <Path.RenderTransform><RotateTransform Angle="0"/></Path.RenderTransform>
+              </Path>
+            </Grid>
+          </Border>
+          <ControlTemplate.Triggers>
+            <DataTrigger Binding="{Binding Row.IsExpanded}" Value="True">
+              <Setter TargetName="Chevron" Property="RenderTransform"><Setter.Value><RotateTransform Angle="90"/></Setter.Value></Setter>
+            </DataTrigger>
+            <Trigger Property="IsMouseOver" Value="True">
+              <Setter TargetName="HitArea" Property="Background" Value="#EAF1FF"/>
+              <Setter Property="Foreground" Value="#2563EB"/>
+            </Trigger>
+            <Trigger Property="IsPressed" Value="True">
+              <Setter TargetName="HitArea" Property="Background" Value="#DCE8FF"/>
+              <Setter Property="Foreground" Value="#1D4ED8"/>
+            </Trigger>
+          </ControlTemplate.Triggers>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+    <Style.Triggers>
+      <DataTrigger Binding="{Binding Row.IsExpanded}" Value="True">
+        <Setter Property="ToolTip" Value="Thu gọn thư mục"/>
+        <Setter Property="AutomationProperties.Name" Value="Thu gọn thư mục"/>
+      </DataTrigger>
+      <DataTrigger Binding="{Binding Row.HasChildren}" Value="False">
+        <Setter Property="Visibility" Value="Hidden"/>
+        <Setter Property="IsHitTestVisible" Value="False"/>
+      </DataTrigger>
+    </Style.Triggers>
+  </Style>
   <Style x:Key="Caption" TargetType="TextBlock"><Setter Property="Foreground" Value="#64748B"/><Setter Property="FontSize" Value="12"/></Style>
   <Style x:Key="Stat" TargetType="TextBlock"><Setter Property="FontSize" Value="27"/><Setter Property="FontWeight" Value="SemiBold"/><Setter Property="Margin" Value="0,6,0,0"/></Style>
   <Style TargetType="GridViewColumnHeader"><Setter Property="Background" Value="#F8FAFC"/><Setter Property="Foreground" Value="#64748B"/><Setter Property="Padding" Value="10"/><Setter Property="HorizontalContentAlignment" Value="Left"/></Style>

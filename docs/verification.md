@@ -35,3 +35,10 @@ Môi trường: Windows x64, 2026-10-27, SDK cục bộ .NET 10.0.403. SDK tải
 - Nguồn API Microsoft: https://learn.microsoft.com/en-us/windows/win32/api/shellapi/nf-shellapi-shgetstockiconinfo ; https://learn.microsoft.com/en-us/windows/win32/api/shellapi/nf-shellapi-shgetfileinfow
 - Trong lần đóng gói đầu của thay đổi icon, test trạng thái cũ lỗi không ổn định (ShellCancelOrFailureIsNotSuccess). Đã điều tra và tái hiện bằng `HeadlessProgressCannotClearSelectionAfterCompletion`: callback Progress<T> chạy thread pool khi không có SynchronizationContext có thể vượt generation guard rồi xóa lựa chọn sau completion. Test mới FAIL (selected row thành null), sau sửa chỉ phát progress khi có context đồng bộ, suite48/48 Release và UI100k PASS. WPF vẫn có context giao diện và nhận progress; runner headless nhận kết quả cuối.
 - Review độc lập phần icon/native/resource/credit: không có Critical/Important, không có mục từ chối đánh giá. Cache128, frozen BitmapSource, HICON lifetime và template chỉ dòng hiện thực đã được rà soát.
+
+## Nút mở / thu thư mục — v1.1.1
+- Thay ký tự text và template Button chung bằng chevron vector riêng: không viền, hit area24x24, đổi nền/màu khi hover/press, hướng phải khi đóng và hướng xuống khi mở. Tooltip và tên accessibility theo trạng thái.
+- File/thư mục rỗng ẩn nút nhưng giữ khoảng căn cột. Giữ phím Trái/Phải và command hiện có.
+- UI smoke trước sửa FAIL: 14nút trên14dòng, gồm12nút trống của file. Sau sửa PASS: chỉ2nút thư mục trên14container thực; gọi command từ nút thu nhánh đưa100.002dòng về2dòng và giữ lựa chọn.
+- Đã xem ảnh expanded/minimum mới; 48/48 test Release PASS trước đóng gói.
+- Lần publish vào thư mục generic bị khóa DLL bởi phiên FolderSize đang chạy (PID47072). Không đóng ứng dụng người dùng; bản mới xuất riêng tại `artifacts/FolderSize-1.1.1-win-x64` và `artifacts/FolderSize-1.1.1-win-x64.zip`.

@@ -45,9 +45,12 @@ internal static class Program
                 Console.WriteLine($"100,000 files: {vm.Rows.Count} visible rows, {count} realized containers; DPI={VisualTreeHelper.GetDpi(window).PixelsPerDip}");
                 if (vm.Rows.Count != 100002 || count < 1 || count > 150) throw new Exception("Virtualization failed");
                 if (Descendants<Image>(list).Count(image => image.Source is not null) != count) throw new Exception("Windows tree icons missing");
+                var expanders = Descendants<Button>(list).Where(button => button.CommandParameter is NodeRowViewModel && button.Visibility == Visibility.Visible).ToArray();
+                if (expanders.Length != 2) throw new Exception($"Expected only two folder expanders, got {expanders.Length}; file rows must not show empty buttons");
                 if (vm.SelectedRow?.Node.Name != "Thư mục lớn") throw new Exception("Selection lost");
                 Save(window, Path.Combine(output, "expanded.png"));
-                vm.ToggleExpanded(vm.Rows[1]); await Layout(window);
+                var folderExpander = expanders.Single(button => ReferenceEquals(button.CommandParameter, vm.Rows[1]));
+                folderExpander.Command.Execute(folderExpander.CommandParameter); await Layout(window);
                 if (vm.Rows.Count != 2) throw new Exception("Collapse retained hidden rows");
                 window.Width = 900; window.Height = 600; await Layout(window); Save(window, Path.Combine(output, "minimum.png"));
                 // Exercise 150% layout without altering the user's Windows DPI settings.
