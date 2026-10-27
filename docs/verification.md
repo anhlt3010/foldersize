@@ -21,3 +21,7 @@ Môi trường: Windows x64, 2026-10-27, SDK cục bộ .NET 10.0.403. SDK tải
 - Các ca success/partial rescan, lỗi/hủy, hủy xác nhận, stale, root không recycle được và không tuyên bố giải phóng chỗ đã được kiểm tra bằng unit/integration tests.
 - Ảnh đã xem: [cây mở](images/foldersize-expanded.png), [cửa sổ tối thiểu](images/foldersize-minimum.png).
 - Chưa kiểm chứng riêng: DPI desktop 100%, bộ bước nhập/chọn folder/bàn phím/recycle trực tiếp trên exe publish và volume không hỗ trợ recycle. Không ghi những mục này là PASS.
+
+## Rà soát cuối
+- Review độc lập toàn nhánh: không có Critical; 1 Important — CanRecycle tạo separator kép khi gốc quét là ổ đĩa. Test `DriveRootCannotBeRecycledButItsDescendantCan` đã FAIL đúng điều kiện, sau sửa PASS. Toàn bộ **45/45 test Release PASS**, build Release **0 warnings / 0 errors**, `git diff --check` PASS. Không có minor hoãn lại, không có mục reviewer từ chối đánh giá.
+- Exe portable đã khởi chạy và được quan sát trạng thái trống bằng accessibility. ZIP gồm 402 entries, có exe, coreclr.dll, PresentationFramework.dll và app DLL. Chưa thực hiện toàn bộ chuỗi thao tác UI trên exe publish như đã nêu ở trên.

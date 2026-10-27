@@ -7,6 +7,15 @@ using Xunit;
 namespace FolderSize.Tests;
 public class MainViewModelTests
 {
+    [Fact]
+    public async Task DriveRootCannotBeRecycledButItsDescendantCan()
+    {
+        var fs = new FakeFileSystem(); fs.Directory(@"C:\", @"C:\file.bin"); fs.File(@"C:\file.bin", 42);
+        var vm = new MainViewModel(new(fs), new FakeShell(), new FakeDialogs()) { PathInput = @"C:\" };
+        await vm.ScanAsync();
+        vm.SelectedRow = vm.Rows[0]; Assert.False(vm.CanRecycle);
+        vm.SelectedRow = vm.Rows[1]; Assert.True(vm.CanRecycle);
+    }
     [Theory]
     [InlineData(RecycleStatus.Success)][InlineData(RecycleStatus.Partial)]
     public async Task ConfirmedRecycleRescansRoot(RecycleStatus status)

@@ -1,6 +1,6 @@
-﻿# FolderSize Implementation Plan
+# FolderSize Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [x]`) syntax for tracking.
 
 **Goal:** Tạo app Windows portable giúp tìm và chuyển các mục chiếm nhiều dung lượng vào Thùng rác qua cây thư mục trực quan.
 
@@ -60,13 +60,13 @@
 - `ScanProgress(string CurrentPath, long SizeBytes, long FileCount, long DirectoryCount, ScanNode Snapshot)`; snapshot tách khỏi cây đang mutate, phát tối đa mỗi 500ms và khi kết thúc, không clone toàn bộ cây mỗi file.
 - `DirectoryScanner(IFileSystem fs).ScanAsync(string root, IProgress<ScanProgress>? progress, CancellationToken token): Task<ScanResult>`.
 
-- [ ] Chuẩn bị SDK .NET 10 x64 bản servicing mới nhất từ nguồn Microsoft, cài vào `.tools/dotnet` nếu chưa có. Không cài toàn máy. Đặt các thư mục tạm/cache trong `.work`; dùng đường dẫn exe tuyệt đối, `--version` phải là 10.0.x. Nếu tải mạng bị chặn thì báo đúng blocker, không tự đổi sang .NET đã hết hỗ trợ khi phát hành.
-- [ ] Khởi tạo Git nếu chưa có; tạo solution/core/tests và script build, pin SDK đã xác minh trong global.json. Không tạo product view trước Task 4. Commit spec đã duyệt và plan; ignore dữ liệu mockup/cache. Mọi commit sau từng task chỉ stage file của task, không stage fixture người dùng.
-- [ ] Viết test đầu tiên `CountsNestedFiles`: fixture giả có root/a.bin=1024, root/sub/b.bin=2048, root/empty; assert root.SizeBytes=3072, FileCount=2, DirectoryCount=2, sub.SizeBytes=2048. Chạy `dotnet test --filter CountsNestedFiles`, xác nhận FAIL do chưa có implementation.
-- [ ] Implement model, PhysicalFileSystem đọc metadata không mở nội dung, scanner dùng stack thay vì recursive call stack, không follow reparse point, chạy trên worker thread và tích lũy tổng bottom-up.
-- [ ] Thêm từng test trước khi thêm nhánh xử lý: `DeniedBranchMarksAncestorsIncomplete` (nhánh lỗi không cản sibling=2048); `EnumerationFailsMidwayKeepsKnownChildren`; `VanishedFileIsIssue`; `ReparseNodesAreSkippedWithoutEnumeration`; `ZeroByteRootHasZeroSize`; `HardLinkPathsAreCountedSeparately`; `CancelReturnsPartialAndCanceled`. Fake metadata không được gọi API mở file. Invalid/missing root phải trả lỗi rõ cho caller, không coi là scan thành công rỗng.
-- [ ] Chạy `dotnet test --filter ScanningTests`; tất cả PASS. Chạy thêm test PhysicalFileSystem trên thư mục temp tự tạo chứa tên tiếng Việt và file nhị phân kích thước biết trước, không quét dữ liệu cá nhân.
-- [ ] Commit `feat: add cancellable directory size scanner`.
+- [x] Chuẩn bị SDK .NET 10 x64 bản servicing mới nhất từ nguồn Microsoft, cài vào `.tools/dotnet` nếu chưa có. Không cài toàn máy. Đặt các thư mục tạm/cache trong `.work`; dùng đường dẫn exe tuyệt đối, `--version` phải là 10.0.x. Nếu tải mạng bị chặn thì báo đúng blocker, không tự đổi sang .NET đã hết hỗ trợ khi phát hành.
+- [x] Khởi tạo Git nếu chưa có; tạo solution/core/tests và script build, pin SDK đã xác minh trong global.json. Không tạo product view trước Task 4. Commit spec đã duyệt và plan; ignore dữ liệu mockup/cache. Mọi commit sau từng task chỉ stage file của task, không stage fixture người dùng.
+- [x] Viết test đầu tiên `CountsNestedFiles`: fixture giả có root/a.bin=1024, root/sub/b.bin=2048, root/empty; assert root.SizeBytes=3072, FileCount=2, DirectoryCount=2, sub.SizeBytes=2048. Chạy `dotnet test --filter CountsNestedFiles`, xác nhận FAIL do chưa có implementation.
+- [x] Implement model, PhysicalFileSystem đọc metadata không mở nội dung, scanner dùng stack thay vì recursive call stack, không follow reparse point, chạy trên worker thread và tích lũy tổng bottom-up.
+- [x] Thêm từng test trước khi thêm nhánh xử lý: `DeniedBranchMarksAncestorsIncomplete` (nhánh lỗi không cản sibling=2048); `EnumerationFailsMidwayKeepsKnownChildren`; `VanishedFileIsIssue`; `ReparseNodesAreSkippedWithoutEnumeration`; `ZeroByteRootHasZeroSize`; `HardLinkPathsAreCountedSeparately`; `CancelReturnsPartialAndCanceled`. Fake metadata không được gọi API mở file. Invalid/missing root phải trả lỗi rõ cho caller, không coi là scan thành công rỗng.
+- [x] Chạy `dotnet test --filter ScanningTests`; tất cả PASS. Chạy thêm test PhysicalFileSystem trên thư mục temp tự tạo chứa tên tiếng Việt và file nhị phân kích thước biết trước, không quét dữ liệu cá nhân.
+- [x] Commit `feat: add cancellable directory size scanner`.
 
 ## Task 2: Điều phối và phép chiếu cây
 
@@ -77,12 +77,12 @@
 - `AppState`: Empty, Scanning, Completed, Canceled, Recycling, Failed, Stale. UI cập nhật qua dispatcher/synchronization context, mọi async exception được xử lý.
 - `IUserDialogs.ConfirmRecycleAsync(string path, long scannedBytes): Task<bool>`, `ShowError(string title,string message)`; method recycle dùng Task 3.
 
-- [ ] Tạo project app tối thiểu để test ViewModel, không viết giao diện chính. Viết `FlattenOnlyExpandedBranches` với root/sub/file: ban đầu 2 dòng, mở sub=3, đóng lại=2; chạy test xác nhận FAIL.
-- [ ] Implement TreeProjection và SizeFormatter; thêm test `SortSiblingsDescendingWithStableTies`, `ShareOfEmptyParentIsNull`, `Format1024IsOneKiB`, `FileCountsDoNotIncludeDirectories`. Giữ thứ tự ghi nhận khi scan chưa xong, chỉ sort hoàn tất.
-- [ ] Viết test ViewModel với scanner fake qua IFileSystem và shell/dialog fake: `CancelKeepsRowsAndDisablesRecycle`, `BusyPreventsSecondScan`, `InvalidPathShowsError`, `ProgressDoesNotReplaceSelectionUnnecessarily`, `CompletionEnablesOnlyEligibleSelection`. Chạy để thấy FAIL rồi implement observable properties/commands và state transitions.
-- [ ] Snapshot tiến độ không được dùng chung mutable collection với worker; áp dụng diff/batch trên UI để giữ selected/expanded paths. Chỉ duy trì các dòng đang hiển thị. Thêm test `LateProgressCannotOverwriteNewerCompletedScan` bằng scan generation ID.
-- [ ] Chạy `dotnet test --filter "ProjectionTests|MainViewModelTests"` và `dotnet build`; tất cả PASS.
-- [ ] Commit `feat: add scan state and virtual tree projection`.
+- [x] Tạo project app tối thiểu để test ViewModel, không viết giao diện chính. Viết `FlattenOnlyExpandedBranches` với root/sub/file: ban đầu 2 dòng, mở sub=3, đóng lại=2; chạy test xác nhận FAIL.
+- [x] Implement TreeProjection và SizeFormatter; thêm test `SortSiblingsDescendingWithStableTies`, `ShareOfEmptyParentIsNull`, `Format1024IsOneKiB`, `FileCountsDoNotIncludeDirectories`. Giữ thứ tự ghi nhận khi scan chưa xong, chỉ sort hoàn tất.
+- [x] Viết test ViewModel với scanner fake qua IFileSystem và shell/dialog fake: `CancelKeepsRowsAndDisablesRecycle`, `BusyPreventsSecondScan`, `InvalidPathShowsError`, `ProgressDoesNotReplaceSelectionUnnecessarily`, `CompletionEnablesOnlyEligibleSelection`. Chạy để thấy FAIL rồi implement observable properties/commands và state transitions.
+- [x] Snapshot tiến độ không được dùng chung mutable collection với worker; áp dụng diff/batch trên UI để giữ selected/expanded paths. Chỉ duy trì các dòng đang hiển thị. Thêm test `LateProgressCannotOverwriteNewerCompletedScan` bằng scan generation ID.
+- [x] Chạy `dotnet test --filter "ProjectionTests|MainViewModelTests"` và `dotnet build`; tất cả PASS.
+- [x] Commit `feat: add scan state and virtual tree projection`.
 
 ## Task 3: Explorer và Thùng rác an toàn
 
@@ -92,37 +92,40 @@
 - `RecycleResult(RecycleStatus Status, string? Message)`, status Success/Canceled/Failed/Partial; cancellation không khẳng định rollback nội dung đã được Shell xử lý.
 - `WindowsShellService` kiểm tra PathPolicy ngay trước thao tác; COM `IFileOperation`, `IShellItem`, progress sink để ghi nhận kết quả mục và `GetAnyOperationsAborted`.
 
-- [ ] Viết `RejectsRootOutsidePrefixAndReparseAncestors`, assert chặn D:/data, D:/database/a khi root D:/data, D:/other, ổ gốc và reparse ở cha; chấp nhận D:/data/sub/file với biến thể hoa/thường và dấu separator chuẩn. Thêm Unicode, khoảng trắng, dấu nháy, trailing slash, dot segments. Chạy FAIL rồi implement PathPolicy.
-- [ ] Viết fake-Shell tests bảo đảm dialog từ chối không gọi Shell, revalidation fail không gọi DeleteItem, Shell cancel không được coi success, lỗi recycle không gọi bất kỳ permanent-delete API nào. Implement action orchestration; không dùng File.Delete/Directory.Delete cho dữ liệu người dùng.
-- [ ] Implement COM STA worker và interop dựa trên tài liệu Windows SDK chính thức. Bật `FOFX_RECYCLEONDELETE`, `FOF_ALLOWUNDO`, `FOFX_EARLYFAILURE`, `FOFX_NOCOPYHOOKS` và chặn UI fallback permanent (kiểm chứng bằng smoke test). Chỉ thao tác filesystem item. Giữ own confirmation; không suppress error theo cách khiến lỗi bị hiểu là thành công. Nếu API/flags không bảo đảm recycle-only thì dừng thao tác với lỗi thay vì thay bằng Delete khác.
-- [ ] Mở Explorer bằng Shell item selection API `SHOpenFolderAndSelectItems` (PIDL), tránh nội suy đường dẫn thành command string; giải phóng COM/PIDL trong finally.
-- [ ] Tạo smoke runner opt-in: tự tạo fixture dưới temp local, bảo đảm fixture không phải junction/ngoài vị trí đã xác thực; recycle một file và một thư mục, verify biến mất ở path cũ và có thể thấy/khôi phục từ Thùng rác. Không tự dọn sạch Thùng rác. Trường hợp recycle không hỗ trợ (network/volume) phải trả Failed mà không xóa file; không dùng dữ liệu thật để thử.
-- [ ] Chạy `dotnet test --filter PathPolicyTests` PASS; chạy smoke bằng `dotnet run --project tests/FolderSize.ShellSmoke -- --recycle-owned-fixtures` trong phiên desktop và ghi bằng chứng. Không ghi PASS nếu phiên không có Shell hoặc không thể xác minh recycle.
-- [ ] Commit `feat: integrate Explorer and recycle-only shell actions`.
+- [x] Viết `RejectsRootOutsidePrefixAndReparseAncestors`, assert chặn D:/data, D:/database/a khi root D:/data, D:/other, ổ gốc và reparse ở cha; chấp nhận D:/data/sub/file với biến thể hoa/thường và dấu separator chuẩn. Thêm Unicode, khoảng trắng, dấu nháy, trailing slash, dot segments. Chạy FAIL rồi implement PathPolicy.
+- [x] Viết fake-Shell tests bảo đảm dialog từ chối không gọi Shell, revalidation fail không gọi DeleteItem, Shell cancel không được coi success, lỗi recycle không gọi bất kỳ permanent-delete API nào. Implement action orchestration; không dùng File.Delete/Directory.Delete cho dữ liệu người dùng.
+- [x] Implement COM STA worker và interop dựa trên tài liệu Windows SDK chính thức. Bật `FOFX_RECYCLEONDELETE`, `FOF_ALLOWUNDO`, `FOFX_EARLYFAILURE`, `FOFX_NOCOPYHOOKS` và chặn UI fallback permanent (kiểm chứng bằng smoke test). Chỉ thao tác filesystem item. Giữ own confirmation; không suppress error theo cách khiến lỗi bị hiểu là thành công. Nếu API/flags không bảo đảm recycle-only thì dừng thao tác với lỗi thay vì thay bằng Delete khác.
+- [x] Mở Explorer bằng Shell item selection API `SHOpenFolderAndSelectItems` (PIDL), tránh nội suy đường dẫn thành command string; giải phóng COM/PIDL trong finally.
+- [x] Tạo smoke runner opt-in: tự tạo fixture dưới temp local, bảo đảm fixture không phải junction/ngoài vị trí đã xác thực; recycle một file và một thư mục, verify biến mất ở path cũ và có thể thấy/khôi phục từ Thùng rác. Không tự dọn sạch Thùng rác. Trường hợp recycle không hỗ trợ (network/volume) phải trả Failed mà không xóa file; không dùng dữ liệu thật để thử.
+- [x] Chạy `dotnet test --filter PathPolicyTests` PASS; chạy smoke bằng `dotnet run --project tests/FolderSize.ShellSmoke -- --recycle-owned-fixtures` trong phiên desktop và ghi bằng chứng. Không ghi PASS nếu phiên không có Shell hoặc không thể xác minh recycle.
+- [x] Commit `feat: integrate Explorer and recycle-only shell actions`.
 
 ## Task 4: Giao diện WPF theo mockup
 
 **Consumes:** MainViewModel và NodeRowViewModel từ Task 2, Shell từ Task 3. **Produces:** app sử dụng thật; FolderPicker dùng OpenFolderDialog của WPF; UserDialogs triển khai hợp đồng Task 2.
 
-- [ ] Tạo App/MainWindow/Styles theo bố cục mockup `.superpowers/brainstorm/292-1793073963/content/layout.html`: path input, chọn folder, scan/cancel, summary, bảng cây và details pane. Không phụ thuộc mockup lúc runtime.
-- [ ] Dùng ListView/GridView với VirtualizingStackPanel.IsVirtualizing=true, VirtualizationMode=Recycling, CanContentScroll=true; không bọc thêm ScrollViewer phá virtualization. Dòng có indent theo Depth, nút toggle riêng và tên file/thư mục, size, share bar, file count. Selection một mục.
-- [ ] Binding commands và enable states; Enter quét path, Left/Right đóng/mở nhánh, Tab focus rõ; mặc định 1200x760, tối thiểu 900x600. Đường dẫn dài có tooltip, summary và details không bị tràn. Dialog issue hiển thị các mục lỗi bằng danh sách ảo hóa.
-- [ ] Hoàn thiện empty/scanning/canceled/completed/incomplete/failed states; progress không có phần trăm giả; label “Kích thước logic” và chú thích tỷ lệ chỉ tính dữ liệu đọc được. Panel xóa cho biết thư mục bao gồm nội dung con; không cho xóa gốc và nêu lý do.
+- [x] Tạo App/MainWindow/Styles theo bố cục mockup `.superpowers/brainstorm/292-1793073963/content/layout.html`: path input, chọn folder, scan/cancel, summary, bảng cây và details pane. Không phụ thuộc mockup lúc runtime.
+- [x] Dùng ListView/GridView với VirtualizingStackPanel.IsVirtualizing=true, VirtualizationMode=Recycling, CanContentScroll=true; không bọc thêm ScrollViewer phá virtualization. Dòng có indent theo Depth, nút toggle riêng và tên file/thư mục, size, share bar, file count. Selection một mục.
+- [x] Binding commands và enable states; Enter quét path, Left/Right đóng/mở nhánh, Tab focus rõ; mặc định 1200x760, tối thiểu 900x600. Đường dẫn dài có tooltip, summary và details không bị tràn. Dialog issue hiển thị các mục lỗi bằng danh sách ảo hóa.
+- [x] Hoàn thiện empty/scanning/canceled/completed/incomplete/failed states; progress không có phần trăm giả; label “Kích thước logic” và chú thích tỷ lệ chỉ tính dữ liệu đọc được. Panel xóa cho biết thư mục bao gồm nội dung con; không cho xóa gốc và nêu lý do.
 - [ ] Chạy `dotnet build`; mở app với fixture Task 1, kiểm tra so với mockup ở 100% và 150% DPI, resize, bàn phím, đường dẫn dài. Tạo fixture giả 100.000 nodes qua test-only harness (không ship switch demo), đóng nhánh lớn rồi mở; verify số container thực tế gần số dòng viewport, không bằng tổng file. Ghi kết quả trong docs/verification.md.
-- [ ] Commit `feat: build Vietnamese disk usage interface`.
+- [x] Commit `feat: build Vietnamese disk usage interface`.
 
 ## Task 5: Tích hợp xóa, cập nhật lại và nghiệm thu
 
 **Files:** MainViewModel.cs, MainViewModelTests.cs, README.md, docs/verification.md, scripts/Build.ps1; sửa các file liên quan khi có lỗi cụ thể.
 
-- [ ] Viết `ConfirmedRecycleRescansRoot`, `CanceledConfirmationDoesNotCallShell`, `PartialRecycleRescansAndShowsWarning`, `ShellFailureMarksStaleWhenUncertain`, `RecycleDisabledDuringScanOrCanceledScan`, `RecycleDoesNotClaimDiskSpaceFreed`; dùng fake shell và fixture. Chạy FAIL rồi hoàn thiện confirmation/recycle/rescan state transitions. Khi re-scan lỗi/hủy, kết quả cũ phải bị đánh dấu stale và chặn xóa.
-- [ ] Xác nhận dialog nêu path đầy đủ, size tại lần scan, “nội dung có thể đã thay đổi” và nội dung con; root không có nút xóa khả dụng. Khi Shell đang chạy khóa scan/delete, giữ UI phản hồi. Thay thế path thành reparse trước gọi Shell phải bị chặn; tài liệu ghi giới hạn thay đổi filesystem đồng thời không thể loại hết race bằng kiểm tra path.
-- [ ] Chạy toàn bộ `dotnet test`, build Release và smoke fixture; mọi FAIL phải được sửa trước đóng task. Review code xóa để không có fallback permanent, không shell-command injection, không nuốt exceptions.
-- [ ] Publish: `dotnet publish src/FolderSize.App -c Release -r win-x64 --self-contained true -p:PublishSingleFile=false -o artifacts/FolderSize-win-x64`. Không trimming WPF. Đóng gói toàn thư mục publish thành zip, không chỉ lấy exe.
+- [x] Viết `ConfirmedRecycleRescansRoot`, `CanceledConfirmationDoesNotCallShell`, `PartialRecycleRescansAndShowsWarning`, `ShellFailureMarksStaleWhenUncertain`, `RecycleDisabledDuringScanOrCanceledScan`, `RecycleDoesNotClaimDiskSpaceFreed`; dùng fake shell và fixture. Chạy FAIL rồi hoàn thiện confirmation/recycle/rescan state transitions. Khi re-scan lỗi/hủy, kết quả cũ phải bị đánh dấu stale và chặn xóa.
+- [x] Xác nhận dialog nêu path đầy đủ, size tại lần scan, “nội dung có thể đã thay đổi” và nội dung con; root không có nút xóa khả dụng. Khi Shell đang chạy khóa scan/delete, giữ UI phản hồi. Thay thế path thành reparse trước gọi Shell phải bị chặn; tài liệu ghi giới hạn thay đổi filesystem đồng thời không thể loại hết race bằng kiểm tra path.
+- [x] Chạy toàn bộ `dotnet test`, build Release và smoke fixture; mọi FAIL phải được sửa trước đóng task. Review code xóa để không có fallback permanent, không shell-command injection, không nuốt exceptions.
+- [x] Publish: `dotnet publish src/FolderSize.App -c Release -r win-x64 --self-contained true -p:PublishSingleFile=false -o artifacts/FolderSize-win-x64`. Không trimming WPF. Đóng gói toàn thư mục publish thành zip, không chỉ lấy exe.
 - [ ] Mở exe đã publish và thử empty → chọn folder → scan → mở/đóng → Explorer → hủy xác nhận → recycle fixture → re-scan; kiểm tra lỗi quyền, mục biến mất và hủy scan. Ghi môi trường, lệnh, kết quả thực tế và ảnh UI trong docs/verification.md; điểm nào chưa chạy phải ghi rõ chưa xác minh.
-- [ ] README tiếng Việt: cách mở exe, chọn folder/ổ, nghĩa kích thước logic, liên kết bị bỏ qua, hardlink tính lặp, kết quả thiếu, Thùng rác chưa giải phóng chỗ, cách build và yêu cầu SDK chỉ cho developer.
-- [ ] `git diff --check`, chạy đúng các kiểm tra bị ảnh hưởng sau sửa cuối; commit `feat: finish portable FolderSize desktop app`. Báo đường dẫn exe/zip và giới hạn kiểm tra; không merge/publish remote ngoài phạm vi.
+- [x] README tiếng Việt: cách mở exe, chọn folder/ổ, nghĩa kích thước logic, liên kết bị bỏ qua, hardlink tính lặp, kết quả thiếu, Thùng rác chưa giải phóng chỗ, cách build và yêu cầu SDK chỉ cho developer.
+- [x] `git diff --check`, chạy đúng các kiểm tra bị ảnh hưởng sau sửa cuối; commit `feat: finish portable FolderSize desktop app`. Báo đường dẫn exe/zip và giới hạn kiểm tra; không merge/publish remote ngoài phạm vi.
 
 ## Self-review
 
 Mọi phần spec có task: scan/metadata/issues=1; projection/state=2; path/Shell safety=3; UI/keyboard/virtualization=4; confirmation/rescan/release/help=5. Các interface dùng thống nhất ScanNode, ScanResult, RecycleResult và AppState. Năm Review Focus đều có test hoặc smoke cụ thể. Toolchain hiện chỉ có SDK 8.0.407; .NET 10 download và runtime pack restore là phụ thuộc môi trường cần xác minh khi bắt đầu, chưa được cài trong giai đoạn lập kế hoạch. Thư mục chưa là Git repo nên tài liệu chưa commit; Task 1 sẽ khởi tạo và commit.
+
+## Trạng thái thực hiện cuối
+Đã triển khai 5 task và tạo portable; 45 test Release đạt, build không cảnh báo, Shell/VM/100k virtualization smoke đạt. Hai checkbox UI để mở: build và render/harness đã chạy, nhưng DPI desktop100% và toàn bộ thao tác UI trực tiếp trên exe publish chưa xác minh. Xem docs/verification.md; không đánh dấu phần kiểm tra chưa chạy là PASS.

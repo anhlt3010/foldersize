@@ -42,7 +42,7 @@ public sealed class MainViewModel(DirectoryScanner scanner, IShellService shell,
     public ICommand ToggleCommand => toggleCommand ??= new(p => { if (p is NodeRowViewModel row) ToggleExpanded(row); return Task.CompletedTask; });
     public bool CanRecycle => State == AppState.Completed && SelectedRow is { Node.IsSkipped: false } row &&
         scanRoot is not null && !string.Equals(scanRoot, row.Node.FullPath, StringComparison.OrdinalIgnoreCase) &&
-        row.Node.FullPath.StartsWith(Path.TrimEndingDirectorySeparator(scanRoot) + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase);
+        row.Node.FullPath.StartsWith(Path.EndsInDirectorySeparator(scanRoot) ? scanRoot : scanRoot + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase);
     public async Task ScanAsync()
     {
         if (!CanScan) return;
