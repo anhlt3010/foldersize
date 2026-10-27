@@ -8,6 +8,23 @@ namespace FolderSize.Tests;
 public class MainViewModelTests
 {
     [Fact]
+    public async Task CanceledConfirmationDoesNotCallShell()
+    {
+        var shell = new FakeShell(); var vm = new MainViewModel(new(Fixture()), shell, new FakeDialogs { Confirm = false }) { PathInput = Root };
+        await vm.ScanAsync(); vm.SelectedRow = vm.Rows[1]; await vm.RecycleSelectedAsync();
+        Assert.Empty(shell.Recycled); Assert.Equal(AppState.Completed, vm.State);
+    }
+    [Theory]
+    [InlineData(RecycleStatus.Canceled)][InlineData(RecycleStatus.Failed)]
+    public async Task ShellCancelOrFailureIsNotSuccess(RecycleStatus status)
+    {
+        var dialogs = new FakeDialogs(); var shell = new FakeShell { Result = new(status, "Uncertain") };
+        var vm = new MainViewModel(new(Fixture()), shell, dialogs) { PathInput = Root };
+        await vm.ScanAsync(); vm.SelectedRow = vm.Rows[1]; await vm.RecycleSelectedAsync();
+        Assert.Equal(new[] { Path.Combine(Root, "file") }, shell.Recycled);
+        Assert.Equal(AppState.Stale, vm.State); Assert.False(vm.CanRecycle); Assert.Single(dialogs.Errors);
+    }
+    [Fact]
     public async Task ProgressDoesNotReplaceSelectionUnnecessarily()
     {
         var vm = new MainViewModel(new(Fixture()), new FakeShell(), new FakeDialogs()) { PathInput = Root };

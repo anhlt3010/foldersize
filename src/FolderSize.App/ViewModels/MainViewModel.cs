@@ -82,7 +82,22 @@ public sealed class MainViewModel(DirectoryScanner scanner, IShellService shell,
         while (Rows.Count > target.Length) Rows.RemoveAt(Rows.Count - 1);
         if (SelectedRow is not null && !Rows.Contains(SelectedRow)) SelectedRow = null;
     }
-    public Task RecycleSelectedAsync() => Task.CompletedTask;
+    public async Task RecycleSelectedAsync()
+    {
+        if (!CanRecycle || SelectedRow is null || scanRoot is null) return;
+        var node = SelectedRow.Node;
+        State = AppState.Recycling;
+        try
+        {
+            if (!await dialogs.ConfirmRecycleAsync(node.FullPath, node.SizeBytes)) { State = AppState.Completed; return; }
+            var result = await shell.RecycleAsync(scanRoot, node.FullPath, CancellationToken.None);
+            State = AppState.Stale;
+            StatusText = result.Status == RecycleStatus.Success ? "Đã chuyển vào Thùng rác. Cần quét lại." : "Thao tác chưa hoàn tất. Cần quét lại.";
+            if (result.Status != RecycleStatus.Success) dialogs.ShowError("Kết quả Thùng rác", result.Message ?? StatusText);
+        }
+        catch (Exception e) { State = AppState.Stale; StatusText = "Cần quét lại."; dialogs.ShowError("Không thể chuyển vào Thùng rác", e.Message); }
+        finally { Notify(nameof(StatusText)); }
+    }
     public async Task OpenSelectedAsync()
     {
         if (SelectedRow is null) return;
