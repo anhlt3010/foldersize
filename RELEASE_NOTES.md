@@ -2,6 +2,22 @@
 
 Tài liệu ghi lại thay đổi trong các phiên bản mã nguồn. Các mục bên dưới không đồng nghĩa với việc đã tạo tag hoặc đăng GitHub Release.
 
+## 1.2.0 — 27/10/2026
+
+### Bổ sung
+
+- Bộ chọn **Tiếng Việt / English** ở góc trên bên phải, đổi ngôn ngữ ngay mà không khởi động lại hoặc quét lại.
+- Dịch nhãn, cột, trạng thái quét/recycle, tooltip, trợ giúp, giới thiệu và thông báo do app định nghĩa. Định dạng số tương ứng vi-VN / en-US.
+- Giữ nguyên đường dẫn, tên file, lựa chọn và các nhánh đang mở khi đổi ngôn ngữ, kể cả khi đang quét.
+- Lưu mã ngôn ngữ trong `%LOCALAPPDATA%\FolderSize\settings.json`; cấu hình thiếu/hỏng dùng tiếng Việt. Lỗi lưu được thông báo mà không chặn sử dụng phiên hiện tại.
+
+### Sửa lỗi và đóng gói
+
+- Đồng bộ cập nhật tiến độ với completion khi SynchronizationContext chạy callback đồng thời, tránh mất lựa chọn sau khi quét.
+- Build script tạo gói phiên bản từ staging sạch: một EXE self-contained nhúng catalog, kèm `LICENSE`; không PDB hay DLL rời. Hỗ trợ `-OutputDirectory` để tránh ghi đè bản đang mở.
+
+Các thành phần native Windows và chi tiết lỗi hệ điều hành vẫn theo ngôn ngữ Windows. Bằng chứng kiểm tra được ghi trong [tài liệu kiểm chứng](docs/verification.md).
+
 ## 1.1.1 — 27/10/2026
 
 **Cải thiện nút mở/thu thư mục để cây gọn và dễ nhìn hơn.**

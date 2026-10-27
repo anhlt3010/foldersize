@@ -1,3 +1,5 @@
+**Ngôn ngữ / Language:** [Tiếng Việt](README.md) · [English](README.en.md)
+
 <p align="center">
   <img src="src/FolderSize.App/Assets/FolderSize.png" width="88" height="88" alt="Biểu tượng FolderSize">
 </p>
@@ -8,7 +10,7 @@
 
 FolderSize quét thư mục hoặc ổ đĩa, hiển thị dung lượng theo cây và giúp bạn mở vị trí trong Explorer hoặc chuyển từng mục vào Thùng rác.
 
-**Phiên bản 1.1.1 · Windows 10/11 x64 · Portable · Giao diện tiếng Việt**
+**Phiên bản 1.2.0 · Windows 10/11 x64 · Portable · Tiếng Việt / English**
 
 ![Giao diện FolderSize](docs/images/foldersize-expanded.png)
 
@@ -20,15 +22,16 @@ FolderSize quét thư mục hoặc ổ đĩa, hiển thị dung lượng theo c�
 - Cây chứa cả file và thư mục, sắp xếp dung lượng giảm dần giữa các mục cùng cha sau khi quét xong.
 - Mũi tên mở/thu gọn, thanh tỷ lệ so với thư mục cha và bảng chi tiết của mục đang chọn.
 - Icon Windows cho ổ đĩa, thư mục đóng/mở và loại file.
+- Đổi **Tiếng Việt / English** ngay trong ứng dụng và ghi nhớ lựa chọn cho lần mở sau.
 - Quét nền, có nút Hủy; giữ kết quả tạm và ghi chi tiết các mục không đọc được.
 - Mở vị trí trong Explorer; recycle từng mục sau khi xác nhận và tự quét lại sau kết quả thành công hoặc một phần.
 - Danh sách ảo hóa để hạn chế số control khi duyệt cây lớn.
 
 ## Chạy bản portable
 
-1. Giải nén **toàn bộ** gói `FolderSize-1.1.1-win-x64.zip` vào một thư mục.
+1. Giải nén **toàn bộ** gói `FolderSize-1.2.0-win-x64.zip` vào một thư mục.
 2. Mở `FolderSize.App.exe` trong thư mục vừa giải nén.
-3. Giữ nguyên các DLL và tệp runtime đi kèm exe.
+3. Giữ tệp `LICENSE` cùng exe khi phân phối lại phần mềm.
 
 Bản portable chứa sẵn runtime .NET, không cần cài .NET riêng. Ứng dụng không tự yêu cầu quyền quản trị.
 
@@ -45,6 +48,14 @@ Gói ZIP là kết quả build, không được lưu trong Git. Nếu bạn tả
 5. Khi cần dọn một mục, bấm **Chuyển vào Thùng rác**, kiểm tra đường dẫn trong hộp xác nhận rồi quyết định tiếp tục hoặc hủy.
 
 Nút **Hủy** giữ dữ liệu đã thu thập nhưng đánh dấu kết quả chưa hoàn tất và khóa thao tác xóa. Bấm **Quét lại** để lấy kết quả mới. Các mục bị lỗi hoặc bỏ qua có thể xem qua **Xem chi tiết** ở cuối cửa sổ.
+
+### Đổi ngôn ngữ
+
+Chọn **Tiếng Việt** hoặc **English** ở góc trên bên phải. Nhãn, trạng thái, cột, tooltip, Trợ giúp, Giới thiệu và định dạng số đổi ngay; tên file, đường dẫn, kết quả quét và lựa chọn được giữ nguyên. Có thể đổi khi đang quét.
+
+Lựa chọn được lưu trong `%LOCALAPPDATA%\FolderSize\settings.json`. Nếu cấu hình thiếu hoặc hỏng, ứng dụng dùng tiếng Việt. Nếu không lưu được, ngôn ngữ vẫn đổi trong phiên hiện tại và ứng dụng hiển thị thông báo. Các nút/hộp thoại native Windows và chi tiết lỗi do Windows cung cấp vẫn theo ngôn ngữ hệ điều hành.
+
+![FolderSize bằng tiếng Anh](docs/images/foldersize-expanded-en.png)
 
 ## Hiểu dung lượng hiển thị
 
@@ -71,7 +82,7 @@ Kết quả là ảnh chụp tại thời điểm quét. File và thư mục có
 
 ## Dữ liệu và phạm vi
 
-FolderSize xử lý dữ liệu cục bộ, không gửi nội dung hoặc đường dẫn file ra mạng. Bản hiện tại không lưu lịch sử quét, tự dọn dữ liệu, chọn nhiều mục, tìm file trùng hoặc tự cập nhật.
+FolderSize xử lý dữ liệu cục bộ, không gửi nội dung hoặc đường dẫn file ra mạng. Chỉ lưu lựa chọn ngôn ngữ trong cấu hình người dùng; không lưu lịch sử quét. Bản hiện tại không tự dọn dữ liệu, chọn nhiều mục, tìm file trùng hoặc tự cập nhật.
 
 ## Build từ mã nguồn
 
@@ -87,17 +98,12 @@ Chạy PowerShell tại thư mục gốc repository:
 ./scripts/Build.ps1 -Publish
 ```
 
-Script tạo thư mục `artifacts/FolderSize-win-x64` chứa exe cùng runtime, và gói `artifacts/FolderSize-win-x64.zip`.
+Script tạo thư mục `artifacts/FolderSize-1.2.0-win-x64` chứa một EXE và `LICENSE`, cùng gói `artifacts/FolderSize-1.2.0-win-x64.zip`. Runtime và catalog ngôn ngữ được nhúng trong EXE; không tạo PDB hoặc DLL rời trong gói phát hành. Script publish vào thư mục staging mới để tránh lẫn tệp cũ.
 
-Đóng ứng dụng đang chạy trong thư mục đầu ra trước khi publish lại để Windows không khóa DLL. Nếu muốn giữ phiên đang chạy, có thể xuất sang thư mục khác, ví dụ với SDK cục bộ:
+Đóng ứng dụng đang chạy trong thư mục đầu ra trước khi publish lại để Windows không khóa EXE. Nếu muốn giữ phiên đang chạy, chọn một thư mục khác:
 
 ```powershell
-./.tools/dotnet/dotnet.exe publish src/FolderSize.App `
-  -c Release -r win-x64 --self-contained true `
-  -p:PublishSingleFile=false -o artifacts/FolderSize-1.1.1-win-x64
-
-Compress-Archive artifacts/FolderSize-1.1.1-win-x64/* `
-  artifacts/FolderSize-1.1.1-win-x64.zip -Force
+./scripts/Build.ps1 -Publish -OutputDirectory artifacts/FolderSize-custom
 ```
 
 Giữ toàn bộ thư mục publish khi phân phối. Bản WPF không dùng trimming.

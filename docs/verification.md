@@ -42,3 +42,13 @@ Môi trường: Windows x64, 2026-10-27, SDK cục bộ .NET 10.0.403. SDK tải
 - UI smoke trước sửa FAIL: 14nút trên14dòng, gồm12nút trống của file. Sau sửa PASS: chỉ2nút thư mục trên14container thực; gọi command từ nút thu nhánh đưa100.002dòng về2dòng và giữ lựa chọn.
 - Đã xem ảnh expanded/minimum mới; 48/48 test Release PASS trước đóng gói.
 - Lần publish vào thư mục generic bị khóa DLL bởi phiên FolderSize đang chạy (PID47072). Không đóng ứng dụng người dùng; bản mới xuất riêng tại `artifacts/FolderSize-1.1.1-win-x64` và `artifacts/FolderSize-1.1.1-win-x64.zip`.
+
+## Đổi ngôn ngữ — v1.2.0
+- 61/61 test Release PASS. Catalog đầy đủ vi/en, đối chiếu placeholder và format; JSON settings thiếu/hỏng/sai kiểu fallbackvi; lưu lỗi vẫn đổi phiên hiện tại và báo lỗi; ghi atomically giữ file cũ khi bị khóa.
+- Kiểm tra VM giữ nguyên row instance/selection/expanded paths/tên/đường dẫn; state và số đổi vi-VN ↔ en-US. Đổi khi đang quét không bắt đầu scan lần hai. Lỗi, hủy và kết quả recycle được dịch theo locale hiện tại.
+- Test tái hiện race trong SynchronizationContext chạy đồng thời đã FAIL trước sửa; stateGate đồng bộ progress/completion/language refresh, sau sửa suite PASS. Không có event subscription cho từng node; VM/window gỡ đăng ký khi đóng/thay.
+- UI smoke 100.000 file PASS: bộ chọn thực đổi vi/en, cột/nút/tooltip/About/số đổi ngay, giữ lựa chọn và dữ liệu; vẫn14container. Đã xem ảnh tiếng Anh ở1200x760 và900x600, DPI thực150%. Native100%DPI vẫn chưa kiểm chứng riêng.
+- Ảnh: [Tiếng Việt](images/foldersize-expanded.png), [English](images/foldersize-expanded-en.png), [About English](images/foldersize-about-en.png).
+- `./scripts/Build.ps1 -Publish` PASS: staging sạch, gói `artifacts/FolderSize-1.2.0-win-x64.zip` chỉ chứa FolderSize.App.exe và LICENSE; LICENSE khớp SHA256 với nguồn. Catalog JSON nhúng trong EXE, không PDB hoặc DLL rời.
+- Exe single-file1.2.0 đã khởi chạy, có cửa sổ phản hồi; accessibility xác minh có bộ chọn ngôn ngữ và các nhãn/cột trạng thái trống. Việc đọc/ghi qua lần mở mới được kiểm tra bằng store/service instance độc lập, không thay cài đặt ngôn ngữ người dùng thật trong test.
+- Review độc lập phần locale/preferences/VM/threading/build: không có Critical/Important/Minor, không có mục từ chối đánh giá. Native Windows dialogs/buttons và lỗi hệ điều hành vẫn theo ngôn ngữ Windows.

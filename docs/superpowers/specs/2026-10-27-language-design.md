@@ -8,5 +8,6 @@ Người dùng đồng ý bổ sung lựa chọn Tiếng Việt / English và l�
 - Chỉ lưu mã ngôn ngữ trong `%LOCALAPPDATA%/FolderSize/settings.json`. Tệp thiếu/hỏng không chặn mở app. Nếu lưu lỗi, vẫn đổi UI và thông báo không lưu được. Không ghi cạnh exe hay lưu lịch sử quét.
 - Một catalog JSON nhúng, một LanguageService có notification và một markup extension tạo binding cho WPF. MainViewModel/NodeRow nhận service để định dạng lại mà không thay collection. Không đăng ký sự kiện trên từng node của cây lớn.
 - Giữ MIT/LTA, icon Windows, recycle-only, ảo hóa và Release một EXE + LICENSE, không PDB. Phiên bản mới 1.2.0.
+- Bổ sung theo yêu cầu trong lúc triển khai: README.en.md tiếng Anh đầy đủ; đầu README.md và README.en.md có liên kết qua lại Việt/Anh.
 
 Các cách đã cân nhắc: đổi culture rồi khởi động lại đơn giản nhưng không đáp ứng cập nhật ngay; hai cửa sổ/giao diện riêng gây trùng lặp. Chọn catalog nhúng + binding notification để đổi trong cửa sổ hiện có và kiểm tra được bằng service độc lập.
