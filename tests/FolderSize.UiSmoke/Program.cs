@@ -9,6 +9,7 @@ using FolderSize.App.ViewModels;
 using FolderSize.App.Services;
 using FolderSize.Core.Actions;
 using FolderSize.Core.Scanning;
+using FolderSize.App.Localization;
 
 internal static class Program
 {
@@ -35,7 +36,7 @@ internal static class Program
                 }
                 var about = new AboutWindow { Owner = window, WindowStartupLocation = WindowStartupLocation.Manual, Left = -20000, Top = -20000, ShowActivated = false };
                 about.Show(); await Layout(about); Save(about, Path.Combine(output, "about.png")); about.Close();
-                var vm = new MainViewModel(new(new SyntheticFileSystem()), new NoShell(), new NoDialogs()) { PathInput = @"C:\FolderSizeFixture" };
+                var vm = new MainViewModel(new(new SyntheticFileSystem()), new NoShell(), new NoDialogs(), LanguageService.Current) { PathInput = @"C:\FolderSizeFixture" };
                 window.DataContext = vm;
                 await vm.ScanAsync(); await Layout(window);
                 if (vm.Rows.Count != 2) throw new Exception("Closed branch should have only two rows");
@@ -49,6 +50,24 @@ internal static class Program
                 if (expanders.Length != 2) throw new Exception($"Expected only two folder expanders, got {expanders.Length}; file rows must not show empty buttons");
                 if (vm.SelectedRow?.Node.Name != "Thư mục lớn") throw new Exception("Selection lost");
                 Save(window, Path.Combine(output, "expanded.png"));
+                var selectedBeforeLanguage = vm.SelectedRow;
+                var picker = (ComboBox)window.FindName("LanguagePicker");
+                picker.SelectedValue = "en"; await Layout(window);
+                if (LanguageService.Current.LanguageCode != "en" || vm.StateLabel != "Scan complete" || vm.TotalSize != "97.66 MiB") throw new Exception("English state/number formatting failed");
+                if (((GridView)list.View).Columns[0].Header?.ToString() != "Name") throw new Exception("Column header did not switch to English");
+                if (!Descendants<Button>(window).Any(button => Equals(button.Content, "Move to Recycle Bin"))) throw new Exception("Action button did not switch to English");
+                if (!ReferenceEquals(selectedBeforeLanguage, vm.SelectedRow) || vm.Rows.Count != 100002 || vm.SelectedRow?.Name != "Thư mục lớn") throw new Exception("Language change altered selection/data");
+                if (expanders.Any(button => !Equals(button.ToolTip, "Collapse folder"))) throw new Exception("Expander tooltip did not switch to English");
+                Save(window, Path.Combine(output, "expanded-en.png"));
+                var englishAbout = new AboutWindow { Owner = window, WindowStartupLocation = WindowStartupLocation.Manual, Left = -20000, Top = -20000, ShowActivated = false };
+                englishAbout.Show(); await Layout(englishAbout);
+                if (englishAbout.Title != "About FolderSize") throw new Exception("About title not localized");
+                Save(englishAbout, Path.Combine(output, "about-en.png")); englishAbout.Close();
+                window.Width = 900; window.Height = 600; await Layout(window); Save(window, Path.Combine(output, "minimum-en.png"));
+                window.Width = 1200; window.Height = 760;
+                picker.SelectedValue = "vi"; await Layout(window);
+                if (((GridView)list.View).Columns[0].Header?.ToString() != "Tên" || !ReferenceEquals(selectedBeforeLanguage, vm.SelectedRow)) throw new Exception("Vietnamese switch lost labels/selection");
+                Console.WriteLine("PASS: live vi/en switching through selector, labels/headers/tooltips/numbers, About and preserved tree state.");
                 var folderExpander = expanders.Single(button => ReferenceEquals(button.CommandParameter, vm.Rows[1]));
                 folderExpander.Command.Execute(folderExpander.CommandParameter); await Layout(window);
                 if (vm.Rows.Count != 2) throw new Exception("Collapse retained hidden rows");

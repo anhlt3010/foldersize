@@ -8,6 +8,31 @@ namespace FolderSize.Tests;
 public class MainViewModelTests
 {
     [Fact]
+    public async Task ConcurrentContextProgressMustFinishBeforeScanCompletes()
+    {
+        using var entered = new ManualResetEventSlim(); using var release = new ManualResetEventSlim();
+        var fs = new FakeFileSystem(); var first = Path.Combine(Root, "first"); var second = Path.Combine(Root, "second");
+        fs.Directory(Root, first, second); fs.File(first, 42); fs.File(second, 84);
+        var readingSecond = 0;
+        fs.OnRead = path =>
+        {
+            if (path == first) Thread.Sleep(550);
+            if (path == second) { Volatile.Write(ref readingSecond, 1); entered.Wait(TimeSpan.FromSeconds(3)); Volatile.Write(ref readingSecond, 0); }
+        };
+        using var vm = new MainViewModel(new(fs), new FakeShell(), new FakeDialogs()) { PathInput = Root };
+        vm.Rows.CollectionChanged += (_, _) => { if (Volatile.Read(ref readingSecond) == 1) { entered.Set(); release.Wait(TimeSpan.FromSeconds(5)); } };
+        var previous = SynchronizationContext.Current; Task scan;
+        try { SynchronizationContext.SetSynchronizationContext(new SynchronizationContext()); scan = vm.ScanAsync(); }
+        finally { SynchronizationContext.SetSynchronizationContext(previous); }
+        try
+        {
+            Assert.True(entered.Wait(TimeSpan.FromSeconds(3)));
+            Assert.NotSame(scan, await Task.WhenAny(scan, Task.Delay(100)));
+        }
+        finally { release.Set(); await scan; }
+        vm.SelectedRow = vm.Rows[1]; Assert.True(vm.CanRecycle);
+    }
+    [Fact]
     public async Task HeadlessProgressCannotClearSelectionAfterCompletion()
     {
         using var progressEntered = new ManualResetEventSlim();

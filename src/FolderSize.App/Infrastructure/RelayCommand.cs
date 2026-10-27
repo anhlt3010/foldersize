@@ -1,4 +1,5 @@
 using System.Windows.Input;
+using FolderSize.App.Localization;
 namespace FolderSize.App.Infrastructure;
 public sealed class RelayCommand(Func<object?, Task> execute, Func<object?, bool>? canExecute = null) : ICommand
 {
@@ -8,6 +9,6 @@ public sealed class RelayCommand(Func<object?, Task> execute, Func<object?, bool
     {
         if (!CanExecute(parameter)) return;
         try { await execute(parameter); }
-        catch (Exception e) { System.Windows.MessageBox.Show(e.Message, "Không thể thực hiện", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error); }
+        catch (Exception e) { System.Windows.MessageBox.Show(LanguageService.Current.TranslateKnownMessage(e.Message), LanguageService.Current["CannotPerform"], System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error); }
     }
 }
