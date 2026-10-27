@@ -17,6 +17,7 @@ public sealed class MainViewModel(DirectoryScanner scanner, IShellService shell,
     private ScanNode? root;
     private string? scanRoot;
     private long generation;
+    private bool needsFreshScan;
     private readonly HashSet<string> expanded = new(StringComparer.OrdinalIgnoreCase);
     public string PathInput { get => pathInput; set => Set(ref pathInput, value); }
     public BatchCollection<NodeRowViewModel> Rows { get; } = [];
@@ -63,11 +64,12 @@ public sealed class MainViewModel(DirectoryScanner scanner, IShellService shell,
             var result = await scanner.ScanAsync(scanRoot, progress, cancellation.Token);
             ++generation;
             root = result.Root; Issues = result.Issues; RefreshRows(!result.IsCanceled);
-            State = result.IsCanceled ? AppState.Canceled : AppState.Completed;
+            State = result.IsCanceled ? needsFreshScan ? AppState.Stale : AppState.Canceled : AppState.Completed;
+            if (!result.IsCanceled) needsFreshScan = false;
             StatusText = result.IsCanceled ? "Đã hủy — kết quả tạm, chưa đầy đủ." : root.IsIncomplete ? "Quét hoàn tất. Một số mục chưa đọc được; xem chi tiết lỗi." : "Quét hoàn tất. Dung lượng là kích thước logic tại thời điểm quét.";
         }
         catch (Exception e)
-        { State = AppState.Failed; StatusText = e.Message; dialogs.ShowError("Không thể quét", e.Message); }
+        { State = root is null ? AppState.Failed : AppState.Stale; StatusText = "Không thể quét: " + e.Message; dialogs.ShowError("Không thể quét", e.Message); }
         finally
         { ++generation; cancellation.Dispose(); cancellation = null; Notify(nameof(StatusText)); Notify(nameof(Issues)); }
     }
@@ -102,10 +104,13 @@ public sealed class MainViewModel(DirectoryScanner scanner, IShellService shell,
         try
         {
             if (!await dialogs.ConfirmRecycleAsync(node.FullPath, node.SizeBytes)) { State = AppState.Completed; return; }
+            needsFreshScan = true;
             var result = await shell.RecycleAsync(scanRoot, node.FullPath, CancellationToken.None);
             State = AppState.Stale;
             StatusText = result.Status == RecycleStatus.Success ? "Đã chuyển vào Thùng rác. Cần quét lại." : "Thao tác chưa hoàn tất. Cần quét lại.";
             if (result.Status != RecycleStatus.Success) dialogs.ShowError("Kết quả Thùng rác", result.Message ?? StatusText);
+            if (result.Status is RecycleStatus.Success or RecycleStatus.Partial)
+            { PathInput = scanRoot; await ScanAsync(); }
         }
         catch (Exception e) { State = AppState.Stale; StatusText = "Cần quét lại."; dialogs.ShowError("Không thể chuyển vào Thùng rác", e.Message); }
         finally { Notify(nameof(StatusText)); }

@@ -12,8 +12,6 @@ internal static class ShellInterop
     [DllImport("shell32.dll", PreserveSig = false)]
     private static extern void SHOpenFolderAndSelectItems(IntPtr folder, uint count, IntPtr[] children, uint flags);
     [DllImport("shell32.dll")] private static extern IntPtr ILFindLastID(IntPtr pidl);
-    [DllImport("shell32.dll")] [return: MarshalAs(UnmanagedType.Bool)] private static extern bool ILRemoveLastID(IntPtr pidl);
-    [DllImport("shell32.dll")] private static extern IntPtr ILCloneFull(IntPtr pidl);
     internal static void SelectInExplorer(string path)
     {
         IntPtr item = IntPtr.Zero, parent = IntPtr.Zero;
@@ -24,8 +22,8 @@ internal static class ShellInterop
                 SHOpenFolderAndSelectItems(item, 0, [], 0);
             else
             {
-                parent = ILCloneFull(item);
-                if (parent == IntPtr.Zero || !ILRemoveLastID(parent)) throw new IOException("Không xác định được thư mục cha.");
+                var parentPath = Path.GetDirectoryName(path) ?? throw new IOException("Không xác định được thư mục cha.");
+                SHParseDisplayName(parentPath, IntPtr.Zero, out parent, 0, out _);
                 SHOpenFolderAndSelectItems(parent, 1, [ILFindLastID(item)], 0);
             }
         }

@@ -7,6 +7,36 @@ using Xunit;
 namespace FolderSize.Tests;
 public class MainViewModelTests
 {
+    [Theory]
+    [InlineData(RecycleStatus.Success)][InlineData(RecycleStatus.Partial)]
+    public async Task ConfirmedRecycleRescansRoot(RecycleStatus status)
+    {
+        var fs = Fixture(); var dialogs = new FakeDialogs(); var shell = new FakeShell { Result = new(status) };
+        var vm = new MainViewModel(new(fs), shell, dialogs) { PathInput = Root };
+        await vm.ScanAsync(); vm.SelectedRow = vm.Rows[1];
+        shell.OnRecycle = () => { fs.Directory(Root); };
+        await vm.RecycleSelectedAsync();
+        Assert.Equal(AppState.Completed, vm.State); Assert.Single(vm.Rows); Assert.Equal(0, vm.Rows[0].Node.SizeBytes);
+        Assert.Equal(status == RecycleStatus.Partial ? 1 : 0, dialogs.Errors.Count);
+        Assert.DoesNotContain("giải phóng", vm.StatusText, StringComparison.OrdinalIgnoreCase);
+    }
+    [Fact]
+    public async Task FailedRescanAfterRecycleMarksOldRowsStale()
+    {
+        var fs = Fixture(); var shell = new FakeShell(); var vm = new MainViewModel(new(fs), shell, new FakeDialogs()) { PathInput = Root };
+        await vm.ScanAsync(); vm.SelectedRow = vm.Rows[1];
+        shell.OnRecycle = () => fs.OnRead = _ => throw new IOException("Root gone");
+        await vm.RecycleSelectedAsync();
+        Assert.Equal(AppState.Stale, vm.State); Assert.False(vm.CanRecycle); Assert.Equal(2, vm.Rows.Count);
+    }
+    [Fact]
+    public async Task RecycleDisabledDuringScanOrCanceledScan()
+    {
+        var fs = Fixture(); var shell = new FakeShell(); var vm = new MainViewModel(new(fs), shell, new FakeDialogs()) { PathInput = Root };
+        await vm.ScanAsync(); vm.SelectedRow = vm.Rows[1];
+        fs.OnRead = _ => { Assert.False(vm.CanRecycle); vm.Cancel(); };
+        await vm.ScanAsync(); await vm.RecycleSelectedAsync(); Assert.Empty(shell.Recycled); Assert.False(vm.CanRecycle);
+    }
     [Fact]
     public async Task OpeningLargeBranchBatchesCollectionChanges()
     {
@@ -132,6 +162,7 @@ internal sealed class FakeShell : IShellService
 {
     public List<string> Recycled { get; } = [];
     public RecycleResult Result { get; set; } = new(RecycleStatus.Success);
+    public Action? OnRecycle { get; set; }
     public Task OpenInExplorerAsync(string path) => Task.CompletedTask;
-    public Task<RecycleResult> RecycleAsync(string root, string path, CancellationToken token) { Recycled.Add(path); return Task.FromResult(Result); }
+    public Task<RecycleResult> RecycleAsync(string root, string path, CancellationToken token) { Recycled.Add(path); OnRecycle?.Invoke(); return Task.FromResult(Result); }
 }
